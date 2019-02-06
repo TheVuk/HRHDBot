@@ -163,6 +163,10 @@ class TickHistory(VukWrapper, VukClient):
     SYMBOL=""#"DLF"
     IP=""
     PORT=4001
+    SECTYPE=""
+    STRIKE=""
+    RIGHT=""
+    EXPIRY=""
     contract = Contract()
 
     def __init__(self):
@@ -204,7 +208,7 @@ class TickHistory(VukWrapper, VukClient):
 
     def fulldaydata(self,ticks):
         try:
-            with open(self.SYMBOL+"_"+str(self.HDATE)+".csv", 'a', newline='') as csvfile:
+            with open(self.SYMBOL+"_"+self.SECTYPE+"_"+str(self.HDATE)+".csv", 'a', newline='') as csvfile:
                 filewriter = csv.writer(csvfile, delimiter=',',
                             quotechar='|', quoting=csv.QUOTE_MINIMAL)
                 if (len(ticks) >=1000):
@@ -246,13 +250,25 @@ def main():
     cmdLineParser.add_argument("-ip", "--ip", action="store", type=str,
                             dest="ip", default="127.0.0.1", help="The IP to get IB Gateway connection")
     cmdLineParser.add_argument("-p", "--port", action="store", type=int,
-                            dest="port", default=4001, help="The TCP port to use")
+                            dest="port", default=4002, help="The TCP port to use For eg: 1122")
     cmdLineParser.add_argument("-s", "--symbol", action="store", type=str,
                             dest="symbol", default="INFY",
-                            help="<instrumentsymbol eg:INFY>")
+                            help="Instrument Symbol For eg: INFY ")
     cmdLineParser.add_argument("-d", "--date", action="store", type=str,
                             dest="date", default="20190131",
-                            help="<data(yyyymmdd eg:20190131)>")
+                            help="Date (yyyymmdd) For eg: 20190131")
+    cmdLineParser.add_argument("-st", "--sectype", action="store", type=str,
+                            dest="sectype", default="STK",
+                            help="Security Type For eg: 'STK','FUT','OPT'")
+    cmdLineParser.add_argument("-e", "--expiry", action="store", type=str,
+                            dest="expiry", default="",
+                            help="Expiry Date For eg: FUT-201903, OPT-20190315")
+    cmdLineParser.add_argument("-sp", "--strike", action="store", type=str,
+                            dest="strike", default="",
+                            help="Option Strike Price For eg: 11222.50")
+    cmdLineParser.add_argument("-r", "--right", action="store", type=str,
+                            dest="right", default="",
+                            help="Option Rights For eg: C or P")
     args = cmdLineParser.parse_args()
     from ibapi import utils
     Contract.__setattr__ = utils.setattr_log
@@ -264,6 +280,7 @@ def main():
         app.HDATE = args.date
         app.IP = args.ip
         app.PORT = args.port
+        app.SECTYPE = args.sectype
         print("Using args", args)
         logging.debug("Using args %s", args)
         app.connect(app.IP, app.PORT, clientId=1)
@@ -278,10 +295,25 @@ def main():
         print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
         print("\n")
         app.contract.symbol = app.SYMBOL
-        app.contract.secType = "STK"   
         app.contract.currency = "INR"  
         app.contract.exchange = "NSE"
-        with open(app.SYMBOL+"_"+str(app.HDATE)+".csv", 'w') as csvfile:
+        if(app.SECTYPE == "STK"):
+            app.contract.secType = app.SECTYPE
+        elif(app.SECTYPE == "FUT"):
+            app.EXPIRY = args.expiry
+            app.contract.secType = app.SECTYPE
+            app.contract.lastTradeDateOrContractMonth = app.EXPIRY
+        elif(app.SECTYPE == "OPT"):
+            app.STRIKE = args.strike
+            app.RIGHT = args.right
+            app.EXPIRY = args.expiry
+            app.contract.secType = app.SECTYPE
+            app.contract.lastTradeDateOrContractMonth = app.EXPIRY
+            app.contract.strike = app.STRIKE
+            app.contract.right = app.RIGHT
+            #app.contract.multiplier = "100"
+    
+        with open(app.SYMBOL+"_"+app.SECTYPE+"_"+str(app.HDATE)+".csv", 'w') as csvfile:
             filewriter = csv.writer(csvfile, delimiter=',',
                             quotechar='|', quoting=csv.QUOTE_MINIMAL)
             filewriter.writerow(["TIME","PRICE","SIZE"])
