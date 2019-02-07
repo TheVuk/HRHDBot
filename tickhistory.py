@@ -326,16 +326,13 @@ def main():
     except Exception :
         logging.error(traceback.format_exc())
         print("\n")
-        print("~~~~~~~~~~~~~~~~~~~~~~~~ Data Collected and Strored ~~~~~~~~~~~~~~~~~~~~~~~")
+        print("~~~~~~~~~~~~~~~~~~~~~~~~ Error ~~~~~~~~~~~~~~~~~~~~~~~")
         print("Error : "+traceback.format_exc())
-        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
     finally:
         app.dumpTestCoverageSituation()
         app.dumpReqAnsErrSituation()
         print("\n")
-        print("~~~~~~~~~~~~~~~~~~~~~~~~ Data Collected and Strored ~~~~~~~~~~~~~~~~~~~~~~~")
-        print("File : "+app.SYMBOL+"_"+str(app.HDATE)+".csv" )
-        print("~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
      
 
 if __name__ == "__main__":
